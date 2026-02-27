@@ -20,7 +20,6 @@ async function startServer() {
   app.post("/api/gemini", async (req, res) => {
     try {
       const { type, message, size } = req.body;
-      // Tenta pegar do ambiente, se não existir tenta ler do .env.example como fallback para o preview
       let apiKey = process.env.GEMINI_API_KEY;
       
       if (!apiKey) {
@@ -34,33 +33,31 @@ async function startServer() {
       }
 
       if (!apiKey) {
-        console.error("ERRO: GEMINI_API_KEY não encontrada.");
-        return res.status(500).json({ error: "API Key não configurada. Por favor, configure a GEMINI_API_KEY." });
+        return res.status(500).json({ error: "API Key não configurada." });
       }
       
-      console.log(`Processando requisição do tipo: ${type}`);
-
-      // Usando modelos extremamente estáveis
-      const model = type === "image" ? "gemini-1.5-flash" : "gemini-1.5-flash";
+      const isImage = type === "image";
+      const model = isImage ? "gemini-2.5-flash-image" : "gemini-1.5-flash";
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
+      const systemPrompt = "Você é o assistente virtual da RogérioVisual, uma empresa de comunicação visual em São João da Boa Vista - SP. Seja profissional, prestativo e responda em português. A empresa faz fachadas, adesivagem residencial e de veículos, banners, faixas e placas PVC/ACM.";
+      
+      const fullPrompt = isImage ? message : `${systemPrompt}\n\nPergunta do cliente: ${message}`;
+
       const body: any = {
-        contents: [{ parts: [{ text: message }] }],
+        contents: [
+          {
+            parts: [{ text: fullPrompt }]
+          }
+        ]
       };
 
-      if (type === "image") {
-        // Para o gemini-1.5-flash, a geração de imagem não é direta via texto puro no generateContent 
-        // da mesma forma que os modelos específicos de imagem. 
-        // Mas vamos manter a estrutura e tentar o modelo flash que é o mais provável de estar disponível.
+      if (isImage) {
         body.generationConfig = {
-          temperature: 0.4,
-          topP: 1,
-          topK: 32,
-          maxOutputTokens: 2048,
-        };
-      } else {
-        body.system_instruction = {
-          parts: [{ text: "Você é o assistente virtual da RogérioVisual, uma empresa de comunicação visual em São João da Boa Vista - SP. Seja profissional, prestativo e responda em português. A empresa faz fachadas, adesivagem residencial e de veículos, banners, faixas e placas PVC/ACM." }]
+          imageConfig: {
+            aspectRatio: "1:1",
+            imageSize: size || "1K"
+          }
         };
       }
 
@@ -70,20 +67,13 @@ async function startServer() {
         body: JSON.stringify(body),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Gemini API Fetch Error (${response.status}):`, errorText);
-        return res.status(response.status).json({ error: `Erro na API do Google: ${response.status}` });
-      }
-
       const data = await response.json();
       
-      if (data.error) {
-        console.error("Gemini API JSON Error:", data.error);
-        return res.status(500).json({ error: data.error.message });
+      if (!response.ok || data.error) {
+        console.error("Gemini API Error:", data.error || data);
+        return res.status(response.status || 500).json({ error: data.error?.message || "Erro na API do Google" });
       }
 
-      console.log("Resposta recebida com sucesso da API Gemini");
       res.status(200).json(data);
     } catch (error: any) {
       console.error("Server Error:", error);
