@@ -31,8 +31,7 @@ async function startServer() {
       }
       
       const isImage = type === "image";
-      // Usando o modelo flash que é o mais estável e gratuito
-      const model = "gemini-1.5-flash";
+      const model = "gemini-3-flash-preview";
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
       const systemPrompt = "Você é o assistente virtual da RogérioVisual, uma empresa de comunicação visual em São João da Boa Vista - SP. Seja profissional, prestativo e responda em português. A empresa faz fachadas, adesivagem residencial e de veículos, banners, faixas e placas PVC/ACM.";
