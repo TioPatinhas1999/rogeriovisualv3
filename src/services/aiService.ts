@@ -15,8 +15,20 @@ export async function* chatWithGemini(message: string, history: any[] = []) {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Erro na API");
+      let errorMessage = "Erro na API";
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorMessage;
+      } catch (e) {
+        // Se não for JSON, tenta pegar o texto
+        try {
+          const textError = await response.text();
+          errorMessage = textError || `Erro ${response.status}`;
+        } catch (e2) {
+          errorMessage = `Erro ${response.status}`;
+        }
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();

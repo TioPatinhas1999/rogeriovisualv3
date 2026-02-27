@@ -54,12 +54,20 @@ async function startServer() {
         body: JSON.stringify(body),
       });
 
-      const data = await response.json();
+      let data: any;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Gemini API returned non-JSON response:", text);
+        return res.status(response.status || 500).json({ error: `Resposta inválida da API do Google (${response.status})` });
+      }
       
       if (!response.ok || data.error) {
         console.error("Gemini API Error:", data.error || data);
         return res.status(response.status || 500).json({ 
-          error: data.error?.message || "Erro na API do Google. Verifique se sua chave de API é válida e tem permissão para o modelo Gemini 1.5 Flash." 
+          error: data.error?.message || "Erro na API do Google. Verifique se sua chave de API é válida." 
         });
       }
 
