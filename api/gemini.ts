@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Usando modelos estáveis para garantir compatibilidade
-    const model = type === "image" ? "gemini-3.1-flash-image-preview" : "gemini-3-flash-preview";
+    const model = type === "image" ? "gemini-1.5-flash" : "gemini-1.5-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
     const body: any = {
@@ -37,13 +37,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (type === "image") {
       body.generationConfig = {
-        imageConfig: {
-          aspectRatio: "1:1",
-          imageSize: size || "1K"
-        }
+        temperature: 0.4,
+        topP: 1,
+        topK: 32,
+        maxOutputTokens: 2048,
       };
     } else {
-      body.systemInstruction = {
+      body.system_instruction = {
         parts: [{ text: "Você é o assistente virtual da RogérioVisual, uma empresa de comunicação visual em São João da Boa Vista - SP. Seja profissional, prestativo e responda em português. A empresa faz fachadas, adesivagem residencial e de veículos, banners, faixas e placas PVC/ACM." }]
       };
     }
@@ -56,11 +56,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       body: JSON.stringify(body),
     })
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Gemini API Fetch Error (${response.status}):`, errorText);
+      return res.status(response.status).json({ error: `Erro na API do Google: ${response.status}` });
+    }
+
     const data = await response.json()
     
     if (data.error) {
-      console.error("Gemini API Error:", data.error);
-      return res.status(data.error.code || 500).json({ error: data.error.message });
+      console.error("Gemini API JSON Error:", data.error);
+      return res.status(500).json({ error: data.error.message });
     }
 
     res.status(200).json(data)
