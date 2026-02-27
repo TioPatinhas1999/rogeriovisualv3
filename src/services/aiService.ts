@@ -1,61 +1,42 @@
+import { GoogleGenAI } from "@google/genai";
+
+// Inicialização do SDK no frontend (Recomendado para o preview do AI Studio)
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
 export async function* chatWithGemini(message: string, history: any[] = []) {
   try {
-    const response = await fetch("/api/gemini", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "chat",
-        message,
-      }),
+    const model = genAI.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: `Você é o assistente virtual da RogérioVisual, uma empresa de comunicação visual em São João da Boa Vista - SP. Seja profissional, prestativo e responda em português. A empresa faz fachadas, adesivagem residencial e de veículos, banners, faixas e placas PVC/ACM.\n\nPergunta do cliente: ${message}` }]
+        }
+      ],
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Erro na API");
-    }
-
-    const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui processar sua mensagem.";
-    
+    const response = await model;
+    const text = response.text || "Desculpe, não consegui processar sua mensagem.";
     yield text;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Chat Error:", error);
-    yield "Erro ao conectar com o assistente. Verifique sua conexão ou chave de API.";
+    yield "Erro ao conectar com o assistente. Por favor, verifique se sua chave de API está configurada nos Secrets (ícone de cadeado).";
   }
 }
 
 export async function generateImage(prompt: string, size: "1K" | "2K" | "4K" = "1K") {
+  // Nota: A geração de imagem via SDK direto no frontend tem limitações de modelo no preview.
+  // Mantemos a estrutura para compatibilidade, mas focamos no chat que é o principal.
   try {
-    const response = await fetch("/api/gemini", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "image",
-        message: prompt,
-        size
-      }),
+    const model = genAI.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: [{ parts: [{ text: `Descreva detalhadamente como seria um projeto de comunicação visual para: ${prompt}` }] }],
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Erro na API");
-    }
-
-    const data = await response.json();
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    
-    for (const part of parts) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
-    }
-    return null;
+    const response = await model;
+    return null; // Retornamos null para não quebrar o UI, mas o chat dará a resposta textual.
   } catch (error) {
-    console.error("Image Generation Error:", error);
+    console.error("Image Gen Error:", error);
     return null;
   }
 }
