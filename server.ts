@@ -14,13 +14,16 @@ async function startServer() {
   app.post("/api/chat", async (req, res) => {
     try {
       const { message, history } = req.body;
-      
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey || apiKey === "MY_GEMINI_API_KEY") {
-        console.error("Gemini API Key is missing or invalid placeholder.");
-        return res.status(500).json({ error: "API Key not configured correctly in environment." });
+      
+      if (!apiKey || apiKey === "MY_GEMINI_API_KEY" || apiKey.length < 10) {
+        console.error("ERRO: GEMINI_API_KEY não configurada corretamente no painel Secrets.");
+        return res.status(500).json({ 
+          error: "Configuração Pendente: Por favor, adicione sua chave no painel 'Secrets' (ícone da chave 🔑 à esquerda) com o nome GEMINI_API_KEY." 
+        });
       }
 
+      console.log("Tentando comunicação com Gemini... (Chave detectada)");
       const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
@@ -44,9 +47,15 @@ async function startServer() {
       });
 
       res.json({ text: response.text });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Gemini Error:", error);
-      res.status(500).json({ error: "Erro ao processar sua solicitação." });
+      let msg = "Erro na IA: ";
+      if (error.message?.includes("API key not valid")) {
+        msg += "A chave de API inserida no Secrets é inválida. Verifique se não há espaços extras.";
+      } else {
+        msg += error.message || "Erro desconhecido";
+      }
+      res.status(500).json({ error: msg });
     }
   });
 

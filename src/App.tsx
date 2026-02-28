@@ -100,9 +100,17 @@ const ChatWidget = () => {
         body: JSON.stringify({ message: userMsg, history: messages })
       });
       const data = await response.json();
-      setMessages(prev => [...prev, { role: 'ai', text: data.text || 'Desculpe, tive um problema.' }]);
+      
+      if (data.error) {
+        setMessages(prev => [...prev, { 
+          role: 'ai', 
+          text: `⚠️ ${data.error}` 
+        }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'ai', text: data.text || 'Desculpe, tive um problema.' }]);
+      }
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'ai', text: 'Erro de conexão. Tente novamente.' }]);
+      setMessages(prev => [...prev, { role: 'ai', text: 'Erro de conexão. Verifique se o servidor está rodando.' }]);
     } finally {
       setIsLoading(false);
     }
