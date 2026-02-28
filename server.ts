@@ -21,17 +21,17 @@ async function startServer() {
     try {
       const { type, message, size } = req.body;
       
-      // Prioridade para a chave injetada pelo sistema
-      const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+      // Prioridade para a chave GOOGLE_API_KEY conforme solicitado pelo usuário
+      let apiKey = (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY || "").trim().replace(/^["']|["']$/g, "");
 
       if (!apiKey) {
         return res.status(500).json({ 
-          error: "Chave de API não encontrada. Por favor, adicione a GEMINI_API_KEY nos Secrets do AI Studio." 
+          error: "Chave de API não encontrada. Por favor, adicione a GOOGLE_API_KEY nos Secrets do AI Studio." 
         });
       }
       
       const isImage = type === "image";
-      const model = "gemini-3-flash-preview";
+      const model = "gemini-1.5-flash-latest";
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
       const systemPrompt = "Você é o assistente virtual da RogérioVisual, uma empresa de comunicação visual em São João da Boa Vista - SP. Seja profissional, prestativo e responda em português. A empresa faz fachadas, adesivagem residencial e de veículos, banners, faixas e placas PVC/ACM.";

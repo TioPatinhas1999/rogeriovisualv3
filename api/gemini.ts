@@ -18,13 +18,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { type, message, size } = req.body
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    const apiKey = (process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY || "").trim().replace(/^["']|["']$/g, "");
     if (!apiKey) {
-      return res.status(500).json({ error: "Chave de API não encontrada. Configure a GEMINI_API_KEY nas variáveis de ambiente do Vercel." })
+      return res.status(500).json({ error: "Chave de API não encontrada. Configure a GOOGLE_API_KEY nas variáveis de ambiente do Vercel." })
     }
 
     const isImage = type === "image";
-    const model = "gemini-3-flash-preview";
+    const model = "gemini-1.5-flash-latest";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
     const systemPrompt = "Você é o assistente virtual da RogérioVisual, uma empresa de comunicação visual em São João da Boa Vista - SP. Seja profissional, prestativo e responda em português. A empresa faz fachadas, adesivagem residencial e de veículos, banners, faixas e placas PVC/ACM.";
