@@ -125,10 +125,10 @@ export default function App() {
                 title: 'Prestação de Serviços', 
                 content: 'Atendemos exclusivamente a região de **São João da Boa Vista - SP**, garantindo agilidade e qualidade no suporte local.' 
               })}
-              className="p-10 bg-blue-600 border border-blue-400/30 rounded-3xl text-left hover:bg-blue-500 transition-all group shadow-xl shadow-blue-900/20"
+              className="p-10 bg-blue-600 border border-blue-400/30 rounded-3xl text-center hover:bg-blue-500 transition-all group shadow-xl shadow-blue-900/20"
             >
-              <h3 className="text-white text-xl font-bold mb-3 flex items-center justify-between">
-                1. Prestação de Serviços
+              <h3 className="text-white text-xl font-black mb-3 flex items-center justify-center gap-2">
+                Prestação de Serviços
                 <Send size={18} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </h3>
               <p className="text-blue-100 text-base">Clique para ver nossa área de atuação.</p>
@@ -145,10 +145,10 @@ export default function App() {
                          '• **PVC Adesivado:** R$ 100/m²\n' +
                          '• **ACM:** R$ 100/m²'
               })}
-              className="p-10 bg-blue-600 border border-blue-400/30 rounded-3xl text-left hover:bg-blue-500 transition-all group shadow-xl shadow-blue-900/20"
+              className="p-10 bg-blue-600 border border-blue-400/30 rounded-3xl text-center hover:bg-blue-500 transition-all group shadow-xl shadow-blue-900/20"
             >
-              <h3 className="text-white text-xl font-bold mb-3 flex items-center justify-between">
-                2. Valores
+              <h3 className="text-white text-xl font-black mb-3 flex items-center justify-center gap-2">
+                Valores
                 <Send size={18} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </h3>
               <p className="text-blue-100 text-base">Consulte nossa tabela de preços base.</p>
@@ -161,10 +161,10 @@ export default function App() {
                 title: 'Serviço Leva e Tráz', 
                 content: 'Oferecemos comodidade para nossos clientes. Para o serviço de coleta e entrega, por favor **verificar disponibilidade** e taxas para sua localização específica.' 
               })}
-              className="p-10 bg-blue-600 border border-blue-400/30 rounded-3xl text-left hover:bg-blue-500 transition-all group shadow-xl shadow-blue-900/20"
+              className="p-10 bg-blue-600 border border-blue-400/30 rounded-3xl text-center hover:bg-blue-500 transition-all group shadow-xl shadow-blue-900/20"
             >
-              <h3 className="text-white text-xl font-bold mb-3 flex items-center justify-between">
-                3. Serviço Leva e Tráz
+              <h3 className="text-white text-xl font-black mb-3 flex items-center justify-center gap-2">
+                Serviço Leva e Tráz
                 <Send size={18} className="opacity-0 group-hover:opacity-100 transition-opacity" />
               </h3>
               <p className="text-blue-100 text-base">Saiba mais sobre nossa logística.</p>
@@ -227,9 +227,13 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={() => setActiveGallery(null)}
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm"
           >
-            <div className="relative w-full max-w-4xl bg-[#0f172a] rounded-3xl overflow-hidden border border-white/10">
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl bg-[#0f172a] rounded-3xl overflow-hidden border border-white/10"
+            >
               <button 
                 onClick={() => setActiveGallery(null)}
                 className="absolute top-6 right-6 z-10 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-all"
@@ -266,9 +270,13 @@ export default function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={() => setActiveFAQ(null)}
             className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm"
           >
-            <div className="relative w-full max-w-lg bg-[#0f172a] rounded-3xl overflow-hidden border border-white/10 p-8">
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-lg bg-[#0f172a] rounded-3xl overflow-hidden border border-white/10 p-8"
+            >
               <button 
                 onClick={() => setActiveFAQ(null)}
                 className="absolute top-6 right-6 z-10 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-all"
